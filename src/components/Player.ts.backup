@@ -1,0 +1,18 @@
+import * as PIXI from "pixi.js";
+
+export class Player extends PIXI.Sprite {
+  speed: number;
+
+  constructor(texture: PIXI.Texture) {
+    super(texture);
+    this.speed = 32; // 타일 크기
+    this.anchor.set(0); // 중심점 → 왼쪽 상단으로 변경
+    this.x = 0; // 첫 타일 위치
+    this.y = 0;
+  }
+
+  move(dx: number, dy: number) {
+    this.x += dx * this.speed;
+    this.y += dy * this.speed;
+  }
+}

@@ -1,0 +1,85 @@
+import { useEffect, useRef } from "react";
+import * as PIXI from "pixi.js";
+import { Player } from "./Player";
+
+const TILE_SIZE = 32;
+const MAP_WIDTH = 10;
+const MAP_HEIGHT = 10;
+
+const GameCanvas = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const appRef = useRef<PIXI.Application | null>(null);
+  const playerRef = useRef<Player | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current || appRef.current) return;
+
+    const app = new PIXI.Application({
+      width: MAP_WIDTH * TILE_SIZE,
+      height: MAP_HEIGHT * TILE_SIZE,
+      backgroundColor: 0x222222,
+    });
+    containerRef.current.appendChild(app.view as HTMLCanvasElement);
+    appRef.current = app;
+
+    // 타일 생성 (단순 사각형)
+    for (let y = 0; y < MAP_HEIGHT; y++) {
+      for (let x = 0; x < MAP_WIDTH; x++) {
+        const tile = new PIXI.Graphics();
+        tile.beginFill((x + y) % 2 === 0 ? 0x555555 : 0x777777);
+        tile.drawRect(0, 0, TILE_SIZE, TILE_SIZE);
+        tile.endFill();
+        tile.x = x * TILE_SIZE;
+        tile.y = y * TILE_SIZE;
+        app.stage.addChild(tile as unknown as PIXI.DisplayObject);
+      }
+    }
+
+    // 플레이어 생성
+    const texture = PIXI.Texture.WHITE;
+    const player = new Player(texture);
+    player.width = TILE_SIZE;
+    player.height = TILE_SIZE;
+    player.tint = 0xff0000;
+    playerRef.current = player;
+    app.stage.addChild(player as unknown as PIXI.DisplayObject);
+    // 플레이어 생성 후
+    player.x = Math.floor(MAP_WIDTH / 2) * TILE_SIZE;
+    player.y = Math.floor(MAP_HEIGHT / 2) * TILE_SIZE;
+
+    // 키보드 이벤트
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!playerRef.current) return;
+      switch (e.key) {
+        case "ArrowUp":
+        case "w":
+          playerRef.current.move(0, -1);
+          break;
+        case "ArrowDown":
+        case "s":
+          playerRef.current.move(0, 1);
+          break;
+        case "ArrowLeft":
+        case "a":
+          playerRef.current.move(-1, 0);
+          break;
+        case "ArrowRight":
+        case "d":
+          playerRef.current.move(1, 0);
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      app.destroy(true, true);
+      appRef.current = null;
+    };
+  }, []);
+
+  return <div ref={containerRef}></div>;
+};
+
+export default GameCanvas;
