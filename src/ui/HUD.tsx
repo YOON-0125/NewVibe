@@ -130,6 +130,17 @@ export const HUD: React.FC<HUDProps> = ({ player, className = '' }) => {
           <span><kbd className="bg-gray-700 px-1 rounded">Esc</kbd> 메뉴</span>
         </div>
       </div>
+      {/* 컴트롤 힌트 - 좌쪽 하단 */}
+      <div className="absolute bottom-2 left-2 pointer-events-auto">
+        <div className="bg-black bg-opacity-75 text-white p-2 rounded">
+          <div className="flex flex-col gap-1 text-xs text-gray-400">
+            <span><kbd className="bg-gray-700 px-1 rounded text-xs">WASD</kbd> 이동</span>
+            <span><kbd className="bg-gray-700 px-1 rounded text-xs">Space</kbd> 공격</span>
+            <span><kbd className="bg-gray-700 px-1 rounded text-xs">1-4</kbd> 능력</span>
+            <span><kbd className="bg-gray-700 px-1 rounded text-xs">E</kbd> 상호작용</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

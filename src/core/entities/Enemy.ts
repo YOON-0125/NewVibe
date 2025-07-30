@@ -2,6 +2,7 @@ import { Character } from './Character';
 import { Position, Stats } from '../../shared/types';
 import { Direction } from '../../shared/enums';
 import { EnemyType } from '../../shared/enums';
+import { Ability } from '../data/abilities';
 
 /**
  * 일반 적 캐릭터 클래스

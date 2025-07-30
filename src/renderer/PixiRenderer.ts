@@ -50,8 +50,7 @@ export class PixiRenderer {
     this.spriteManager = new SpriteManager(this.app);
     this.spriteManager.loadResources();
 
-    // 테스트용 엔티티 생성
-    this.createTestEntities();
+    // 테스트용 엔티티 생성 제거 - GameScene에서 관리
 
     console.log('PixiRenderer initialized');
   }
@@ -176,9 +175,13 @@ export class PixiRenderer {
       width: MAP_CONFIG.TILE_SIZE,
       height: MAP_CONFIG.TILE_SIZE,
     });
-    this.app.renderer.render(graphics as unknown as PIXI.DisplayObject, {
-      renderTexture: texture,
-    });
+    
+    if (this.app.renderer) {
+      this.app.renderer.render(graphics as unknown as PIXI.DisplayObject, {
+        renderTexture: texture,
+      });
+    }
+    
     return new PIXI.Sprite(texture);
   }
 
@@ -254,9 +257,13 @@ export class PixiRenderer {
       width: MAP_CONFIG.TILE_SIZE,
       height: MAP_CONFIG.TILE_SIZE,
     });
-    this.app.renderer.render(graphics as unknown as PIXI.DisplayObject, {
-      renderTexture: texture,
-    });
+    
+    if (this.app.renderer) {
+      this.app.renderer.render(graphics as unknown as PIXI.DisplayObject, {
+        renderTexture: texture,
+      });
+    }
+    
     return new PIXI.Sprite(texture);
   }
 
@@ -397,6 +404,10 @@ export class PixiRenderer {
    * 스크린샷 촬영
    */
   public takeScreenshot(): string {
+    if (!this.app.renderer) {
+      console.warn('Renderer not available for screenshot');
+      return '';
+    }
     return this.app.renderer.plugins.extract.base64(this.app.stage);
   }
 
