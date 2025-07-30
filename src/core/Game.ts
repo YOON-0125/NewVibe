@@ -1,6 +1,7 @@
 import { SceneManager } from './SceneManager';
 import { InputSystem } from './systems/InputSystem';
 import { MapSystem } from './systems/MapSystem';
+import { Player } from './entities/Player'; // 추가
 import { PixiRenderer } from '../renderer/PixiRenderer';
 
 /**
@@ -91,8 +92,14 @@ export class Game {
    * 게임 상태 업데이트
    */
   private update(deltaTime: number): void {
+    // 입력 시스템 업데이트 (비워져 있음)
     this.inputSystem.update();
+    
+    // 씬 업데이트 (여기서 키 입력 처리)
     this.sceneManager.update(deltaTime);
+    
+    // 프레임 끝에 입력 상태 리셋
+    this.inputSystem.lateUpdate();
   }
 
   /**
@@ -133,5 +140,12 @@ export class Game {
 
   public getRenderer(): PixiRenderer | null {
     return this.renderer;
+  }
+
+  /**
+   * 현재 플레이어 가져오기
+   */
+  public getCurrentPlayer(): Player | null {
+    return this.sceneManager?.getCurrentPlayer() || null;
   }
 }

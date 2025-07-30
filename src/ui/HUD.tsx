@@ -73,44 +73,6 @@ export const HUD: React.FC<HUDProps> = ({ player, className = '' }) => {
           </div>
         </div>
 
-        {/* 능력 슬롯 */}
-        <div className="flex-1 max-w-md">
-          <div className="text-sm font-semibold mb-2">능력</div>
-          <div className="grid grid-cols-4 gap-2">
-            {Array.from({ length: 8 }, (_, index) => {
-              const ability = playerStats.abilities[index];
-              return (
-                <div
-                  key={index}
-                  className={`w-12 h-12 border-2 rounded flex items-center justify-center text-xs font-bold ${
-                    ability 
-                      ? 'border-blue-400 bg-blue-900 text-blue-200' 
-                      : 'border-gray-600 bg-gray-800 text-gray-500'
-                  }`}
-                  title={ability ? `${ability.name}: ${ability.description}` : '빈 슬롯'}
-                >
-                  {ability ? (index + 1).toString() : ''}
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* 능력 목록 */}
-          {playerStats.abilities.length > 0 && (
-            <div className="mt-2 text-xs">
-              {playerStats.abilities.slice(0, 4).map((ability, index) => (
-                <div key={ability.id} className="flex items-center gap-2 mb-1">
-                  <span className="w-4 h-4 bg-blue-600 rounded text-center text-white text-xs">
-                    {index + 1}
-                  </span>
-                  <span className="text-blue-200">{ability.name}</span>
-                  <span className="text-gray-400 text-xs">({ability.element})</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* 게임 정보 */}
         <div className="flex-1 text-right">
           <div className="text-xs text-gray-300">

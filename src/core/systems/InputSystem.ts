@@ -23,9 +23,18 @@ export class InputSystem {
 
   /**
    * 입력 상태 업데이트 (매 프레임 호출)
+   * 주의: isPressed 상태는 이 메서드 호출 후 리셋됩니다
    */
   public update(): void {
-    // 매 프레임마다 isPressed 상태를 초기화
+    // 이 메서드는 씬 업데이트 이후에 호출되어야 함
+    // 현재는 비워둠 - lateUpdate에서 처리
+  }
+
+  /**
+   * 프레임 끝에서 호출되는 업데이트 (isPressed 상태 리셋)
+   */
+  public lateUpdate(): void {
+    // 매 프레임 끝에 isPressed 상태를 초기화
     for (const keyCode in this.inputState.keys) {
       if (this.inputState.keys.hasOwnProperty(keyCode)) {
         this.inputState.keys[keyCode].isPressed = false;

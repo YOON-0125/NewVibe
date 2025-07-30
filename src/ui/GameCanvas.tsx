@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Game } from '../core/Game';
+import { Player } from '../core/entities/Player'; // 추가
 import { PixiRenderer } from '../renderer/PixiRenderer';
 
 interface GameCanvasProps {
   onGameReady?: (game: Game) => void;
+  onPlayerReady?: (player: Player) => void; // 추가
   className?: string;
 }
 
@@ -12,6 +14,7 @@ interface GameCanvasProps {
  */
 export const GameCanvas: React.FC<GameCanvasProps> = ({ 
   onGameReady, 
+  onPlayerReady, // 추가
   className = '' 
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);

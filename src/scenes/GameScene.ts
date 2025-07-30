@@ -6,7 +6,7 @@ import { InputSystem } from '../core/systems/InputSystem';
 import { MapSystem } from '../core/systems/MapSystem';
 import { CombatSystem } from '../core/systems/CombatSystem';
 import { AbilitySystem } from '../core/systems/AbilitySystem';
-import { DOKKAEBI_ABILITIES } from '../core/data/abilities';
+import { DOKKAEBI_ABILITIES, findAbilityById } from '../core/data/abilities';
 import { PixiRenderer } from '../renderer/PixiRenderer';
 import { Position, Stats, GameMap } from '../shared/types';
 import { Direction, BossType, EnemyType, TileType } from '../shared/enums';
@@ -133,7 +133,24 @@ export class GameScene extends BaseScene {
 
     this.player = new Player('player-001', '주역술사', startPosition, playerStats);
 
+    // 기본 능력 추가
+    const basicAbilities = [
+      findAbilityById('water_wave'),    // 1번: 공격 능력
+      findAbilityById('healing_spring'), // 2번: 치유 능력
+      findAbilityById('water_shield'),   // 3번: 방어 능력
+    ];
+
+    basicAbilities.forEach((ability, index) => {
+      if (ability) {
+        this.player!.addAbility(ability);
+        console.log(`Added ability ${index + 1}: ${ability.name}`);
+      } else {
+        console.warn(`Failed to find ability for slot ${index + 1}`);
+      }
+    });
+
     console.log('Player created at position:', startPosition);
+    console.log('Player abilities:', this.player.getAbilities().map(a => a.name));
   }
 
   /**
@@ -178,6 +195,7 @@ export class GameScene extends BaseScene {
       { x: 9, y: 7 },
       enemyStats,
       EnemyType.Goblin,
+      [] // 기본 적은 능력 없음
     );
     this.enemies.push(enemy1);
 
@@ -226,6 +244,18 @@ export class GameScene extends BaseScene {
   private handleInput(): void {
     if (!this.inputSystem || !this.player) return;
 
+    // 입력 감지 테스트 로그
+    const testKeys = ['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyZ', 'KeyE', 'Enter', 'Digit1', 'Digit2', 'Digit3', 'Digit4'];
+    
+    testKeys.forEach(key => {
+      if (this.inputSystem!.isKeyPressed(key)) {
+        console.log(`🎯 Key pressed: ${key}`);
+      }
+      if (this.inputSystem!.isKeyDown(key)) {
+        console.log(`🔽 Key down: ${key}`);
+      }
+    });
+
     // 연속 이동을 위한 키 상태 체크 (gemini)
     if (this.inputSystem.isKeyDown('KeyW') || this.inputSystem.isKeyDown('ArrowUp')) {
       // (gemini)
@@ -243,6 +273,7 @@ export class GameScene extends BaseScene {
 
     // 전투 입력 (Space 또는 Z키)
     if (this.inputSystem.isKeyPressed('Space') || this.inputSystem.isKeyPressed('KeyZ')) {
+      console.log('Combat key pressed!');
       this.handleCombat();
     }
 
@@ -259,6 +290,7 @@ export class GameScene extends BaseScene {
 
     // 상호작용 (E키 또는 Enter)
     if (this.inputSystem.isKeyPressed('KeyE') || this.inputSystem.isKeyPressed('Enter')) {
+      console.log('Interaction key pressed!');
       this.handleInteraction();
     }
   }
@@ -444,33 +476,70 @@ export class GameScene extends BaseScene {
    * 전투 처리
    */
   private handleCombat(): void {
-    if (!this.player || !this.combatSystem) return;
+    console.log('=== Combat Debug Start ===');
+    
+    if (!this.player || !this.combatSystem) {
+      console.log('Combat failed: player or combatSystem not available');
+      console.log('Player:', !!this.player, 'CombatSystem:', !!this.combatSystem);
+      return;
+    }
 
     const playerPos = this.player.getPosition();
+    console.log('Player position:', playerPos);
+    console.log('Total enemies:', this.enemies.length, 'Total bosses:', this.bosses.length);
+
+    // 모든 적들의 위치와 상태 확인
+    [...this.enemies, ...this.bosses].forEach((enemy, index) => {
+      const enemyPos = enemy.getPosition();
+      const isAlive = enemy.getIsAlive();
+      const distance = Math.abs(playerPos.x - enemyPos.x) + Math.abs(playerPos.y - enemyPos.y);
+      console.log(`Enemy ${index}: ${enemy.getName()} at (${enemyPos.x},${enemyPos.y}), alive: ${isAlive}, distance: ${distance}`);
+    });
 
     // 인접한 적 찾기
     const nearbyEnemies = [...this.enemies, ...this.bosses].filter((enemy) => {
-      if (!enemy.getIsAlive()) return false;
+      if (!enemy.getIsAlive()) {
+        console.log(`Enemy ${enemy.getName()} is dead, skipping`);
+        return false;
+      }
 
       const enemyPos = enemy.getPosition();
       const distance = Math.abs(playerPos.x - enemyPos.x) + Math.abs(playerPos.y - enemyPos.y);
-      return distance <= 1; // 인접한 칸 (1칸 거리)
+      const isNearby = distance <= 1;
+      console.log(`Enemy ${enemy.getName()}: distance=${distance}, nearby=${isNearby}`);
+      return isNearby;
     });
+
+    console.log('Nearby enemies found:', nearbyEnemies.length);
 
     if (nearbyEnemies.length > 0) {
       // 첫 번째 적과 전투
       const target = nearbyEnemies[0];
+      console.log(`Attempting combat: ${this.player.getName()} vs ${target.getName()}`);
+      console.log('Target health before:', target.getStats().health);
+      
       const combatResult = this.combatSystem.performAttack(this.player, target);
+      console.log('Combat result:', combatResult);
+      console.log('Target health after:', target.getStats().health);
+      console.log('Target alive after:', target.getIsAlive());
 
       if (combatResult) {
-        console.log(`전투: ${this.player.getName()} vs ${target.getName()}`);
+        console.log(`전투 성공: ${this.player.getName()} vs ${target.getName()}`);
 
         // 적이 죽었으면 렌더링 업데이트
         this.renderEnemies();
+        
+        if (!target.getIsAlive()) {
+          console.log(`${target.getName()} has been defeated!`);
+        }
+      } else {
+        console.log('Combat failed for unknown reason');
       }
     } else {
       console.log('전투 가능한 적이 근처에 없습니다.');
     }
+    
+    console.log('=== Combat Debug End ===\n');
   }
 
   /**
@@ -498,24 +567,54 @@ export class GameScene extends BaseScene {
    * 상호작용 처리 (계단, 아이템 등)
    */
   private handleInteraction(): void {
-    if (!this.player || !this.currentMap) return;
+    console.log('=== Interaction Debug Start ===');
+    
+    if (!this.player || !this.currentMap) {
+      console.log('Interaction failed: player or currentMap not available');
+      console.log('Player:', !!this.player, 'CurrentMap:', !!this.currentMap);
+      return;
+    }
 
     const playerPos = this.player.getPosition();
+    console.log('Player trying to interact at position:', playerPos);
+    console.log('Map size:', this.currentMap.width, 'x', this.currentMap.height);
+    
+    // 맵의 exitPoint (계단 위치) 정보 출력
+    if (this.currentMap.exitPoint) {
+      console.log('Exit point (stairs location):', this.currentMap.exitPoint);
+      const distanceToStairs = Math.abs(playerPos.x - this.currentMap.exitPoint.x) + Math.abs(playerPos.y - this.currentMap.exitPoint.y);
+      console.log('Distance to stairs:', distanceToStairs);
+    }
 
     // 현재 위치의 타일 확인
     if (this.isValidPosition(playerPos)) {
       const currentTile = this.currentMap.tiles[playerPos.x][playerPos.y];
+      console.log('Current tile info:');
+      console.log('  - Type:', currentTile.type);
+      console.log('  - Walkable:', currentTile.walkable);
+      console.log('  - Visible:', currentTile.visible);
+      console.log('  - Explored:', currentTile.explored);
 
       // 계단 상호작용
       if (currentTile.type === TileType.Stairs) {
-        // TileType.Stairs
-        console.log('계단을 발견했습니다! 다음 층으로...');
+        console.log('🎉 계단을 발견했습니다! 다음 층으로...');
         // 다음 층 이동 로직 (추후 구현)
         this.goToNextFloor();
+      } else if (currentTile.type === TileType.Door) {
+        console.log('🚪 문을 발견했습니다!');
+        // 문 열기 로직 (추후 구현)
+      } else if (currentTile.type === TileType.Floor) {
+        console.log('바닥 타일입니다. 상호작용할 수 있는 것이 없습니다.');
+      } else if (currentTile.type === TileType.Wall) {
+        console.log('벽입니다. 상호작용할 수 없습니다.');
       } else {
-        console.log('상호작용할 수 있는 것이 없습니다.');
+        console.log('알 수 없는 타일 타입입니다:', currentTile.type);
       }
+    } else {
+      console.log('Invalid position for interaction:', playerPos);
     }
+    
+    console.log('=== Interaction Debug End ===\n');
   }
 
   /**

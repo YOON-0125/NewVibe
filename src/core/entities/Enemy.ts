@@ -13,16 +13,19 @@ export class Enemy extends Character {
   protected target: Character | null = null;
   protected moveTimer: number = 0;
   protected attackCooldown: number = 0;
+  protected abilities: Ability[] = [];
 
   constructor(
     id: string,
     name: string,
     position: Position,
     stats: Stats,
-    enemyType: EnemyType
+    enemyType: EnemyType,
+    abilities: Ability[] = []
   ) {
     super(id, name, position, stats);
     this.enemyType = enemyType;
+    this.abilities = [...abilities];
   }
 
   /**
@@ -212,5 +215,28 @@ export class Enemy extends Character {
 
   public getAIState(): string {
     return this.aiState;
+  }
+
+  public getAbilities(): Ability[] {
+    return [...this.abilities];
+  }
+
+  /**
+   * 능력 추가
+   */
+  public addAbility(ability: Ability): void {
+    this.abilities.push(ability);
+  }
+
+  /**
+   * 능력 제거
+   */
+  public removeAbility(abilityId: string): boolean {
+    const index = this.abilities.findIndex(ability => ability.id === abilityId);
+    if (index !== -1) {
+      this.abilities.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 }

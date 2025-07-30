@@ -180,6 +180,8 @@ export class PixiRenderer {
       this.app.renderer.render(graphics as unknown as PIXI.DisplayObject, {
         renderTexture: texture,
       });
+    } else {
+      console.warn('Renderer not available for tile sprite creation');
     }
     
     return new PIXI.Sprite(texture);
@@ -262,6 +264,8 @@ export class PixiRenderer {
       this.app.renderer.render(graphics as unknown as PIXI.DisplayObject, {
         renderTexture: texture,
       });
+    } else {
+      console.warn('Renderer not available for entity sprite creation');
     }
     
     return new PIXI.Sprite(texture);
@@ -361,14 +365,20 @@ export class PixiRenderer {
    * UI 요소들 제거
    */
   public clearUI(): void {
-    this.uiContainer.removeChildren();
+    while (this.uiContainer.children.length > 0) {
+      const child = this.uiContainer.children[0];
+      this.uiContainer.removeChild(child as unknown as PIXI.DisplayObject);
+    }
   }
 
   /**
    * 맵 스프라이트들 제거
    */
   private clearMapSprites(): void {
-    this.mapContainer.removeChildren();
+    while (this.mapContainer.children.length > 0) {
+      const child = this.mapContainer.children[0];
+      this.mapContainer.removeChild(child as unknown as PIXI.DisplayObject);
+    }
     this.tileSprites.clear();
   }
 
@@ -376,7 +386,10 @@ export class PixiRenderer {
    * 모든 엔티티 스프라이트 제거
    */
   public clearEntities(): void {
-    this.entityContainer.removeChildren();
+    while (this.entityContainer.children.length > 0) {
+      const child = this.entityContainer.children[0];
+      this.entityContainer.removeChild(child as unknown as PIXI.DisplayObject);
+    }
     this.entitySprites.clear();
   }
 
@@ -388,7 +401,7 @@ export class PixiRenderer {
     const debugTexts = this.uiContainer.children.filter(child => 
       (child as any).debugInfo === true
     );
-    debugTexts.forEach(text => this.uiContainer.removeChild(text));
+    debugTexts.forEach(text => this.uiContainer.removeChild(text as unknown as PIXI.DisplayObject));
 
     // 새 디버그 정보 렌더링
     info.forEach((line, index) => {

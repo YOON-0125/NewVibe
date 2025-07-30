@@ -11,7 +11,6 @@ export class Boss extends Enemy {
   private bossType: BossType;
   private phase: number = 1;
   private maxPhases: number = 3;
-  private abilities: Ability[] = [];
   private specialAttackCooldown: number = 0;
   private enrageThreshold: number = 0.3; // 30% 체력 이하에서 광폭화
 
@@ -23,9 +22,8 @@ export class Boss extends Enemy {
     bossType: BossType,
     abilities: Ability[]
   ) {
-    super(id, name, position, stats, EnemyType.Boss);
+    super(id, name, position, stats, EnemyType.Boss, abilities);
     this.bossType = bossType;
-    this.abilities = [...abilities];
   }
 
   /**
@@ -131,10 +129,11 @@ export class Boss extends Enemy {
    * 랜덤 능력 선택
    */
   private getRandomAbility(): Ability | null {
-    if (this.abilities.length === 0) return null;
+    const abilities = this.getAbilities();
+    if (abilities.length === 0) return null;
     
-    const randomIndex = Math.floor(Math.random() * this.abilities.length);
-    return this.abilities[randomIndex];
+    const randomIndex = Math.floor(Math.random() * abilities.length);
+    return abilities[randomIndex];
   }
 
   /**
@@ -157,7 +156,7 @@ export class Boss extends Enemy {
     console.log(`${this.name} has been defeated!`);
     console.log('Boss abilities available for absorption:');
     
-    this.abilities.forEach((ability, index) => {
+    this.getAbilities().forEach((ability, index) => {
       console.log(`${index + 1}. ${ability.name}: ${ability.description}`);
     });
   }
@@ -167,11 +166,11 @@ export class Boss extends Enemy {
    */
   public getDroppableAbilities(): Ability[] {
     // 보스가 가진 능력 중 일부를 드랍
-    const dropCount = Math.min(3, this.abilities.length); // 최대 3개
+    const dropCount = Math.min(3, this.getAbilities().length); // 최대 3개
     const droppedAbilities: Ability[] = [];
     
     // 랜덤하게 능력 선택
-    const shuffled = [...this.abilities].sort(() => 0.5 - Math.random());
+    const shuffled = [...this.getAbilities()].sort(() => 0.5 - Math.random());
     
     for (let i = 0; i < dropCount; i++) {
       droppedAbilities.push(shuffled[i]);
@@ -194,10 +193,6 @@ export class Boss extends Enemy {
 
   public getPhase(): number {
     return this.phase;
-  }
-
-  public getAbilities(): Ability[] {
-    return [...this.abilities];
   }
 
   public getMaxPhases(): number {

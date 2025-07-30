@@ -1,6 +1,7 @@
 import { Scene } from '../shared/types';
 import { IScene } from '../scenes/BaseScene';
 import { GameScene } from '../scenes/GameScene';
+import { Player } from './entities/Player'; // 추가
 import { InputSystem } from './systems/InputSystem';
 import { MapSystem } from './systems/MapSystem';
 import { PixiRenderer } from '../renderer/PixiRenderer';
@@ -121,5 +122,13 @@ export class SceneManager {
 
   public getCurrentSceneInstance(): IScene | undefined {
     return this.scenes.get(this.currentScene);
+  }
+
+  /**
+   * 현재 플레이어 가져오기 (GameScene에서)
+   */
+  public getCurrentPlayer(): Player | null {
+    const gameScene = this.scenes.get(Scene.Game) as GameScene;
+    return gameScene?.getPlayer() || null;
   }
 }

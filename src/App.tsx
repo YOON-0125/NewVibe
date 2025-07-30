@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import './App.css';
 
 import { Game } from './core/Game';
-import { Player } from './core/entities/Player';
+import { Player } from './core/entities/Player'; // Game에서 가져오는 플레이어 타입용
 import { Scene } from './shared/types';
 
 // UI 컴포넌트들
@@ -26,6 +26,22 @@ function App() {
   const handleGameReady = useCallback((gameInstance: Game) => {
     setGame(gameInstance);
     console.log('Game ready!');
+    
+    // 게임에서 실제 플레이어 가져오기
+    const actualPlayer = gameInstance.getCurrentPlayer();
+    if (actualPlayer) {
+      setPlayer(actualPlayer);
+      console.log('Game initialized successfully');
+    } else {
+      // 플레이어가 아직 준비되지 않았으면 잠시 후 다시 시도
+      setTimeout(() => {
+        const delayedPlayer = gameInstance.getCurrentPlayer();
+        if (delayedPlayer) {
+          setPlayer(delayedPlayer);
+          console.log('Game initialized successfully (delayed)');
+        }
+      }, 100);
+    }
   }, []);
 
   /**
@@ -34,25 +50,8 @@ function App() {
   const handleStartNewGame = useCallback(() => {
     console.log('Starting new game...');
     setCurrentScene(Scene.Game);
-    
-    // 게임이 준비되면 플레이어 생성
-    if (game) {
-      // 임시 플레이어 생성 (실제로는 게임 시스템에서 생성)
-      const newPlayer = new Player(
-        'player_1',
-        '무명의 무사',
-        { x: 10, y: 10 },
-        {
-          health: 100,
-          attack: 15,
-          defense: 8,
-          speed: 100,
-          mana: 50,
-        }
-      );
-      setPlayer(newPlayer);
-    }
-  }, [game]);
+    // 플레이어는 게임에서 자동으로 생성되고 handleGameReady에서 설정됨
+  }, []);
 
   /**
    * 게임 불러오기
@@ -188,13 +187,13 @@ function App() {
                 player={player}
                 onUseAbility={handleUseAbility}
                 onClosePanel={() => setShowAbilityPanel(false)}
-                className="z-30"
+                className="z-40"
               />
             )}
             
             {/* 디버그 정보 (개발 모드에서만) */}
             {process.env.NODE_ENV === 'development' && (
-              <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white p-2 rounded text-xs z-40">
+              <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white p-2 rounded text-xs z-50">
                 <div>Scene: {currentScene}</div>
                 <div>Player: {player ? player.getName() : 'None'}</div>
                 <div>Game: {game ? 'Ready' : 'Loading...'}</div>
