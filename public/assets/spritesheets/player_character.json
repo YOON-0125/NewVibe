@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "image": "Player_character.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 288,
+      "h": 224
+    },
+    "scale": "1"
+  },
+  "frames": {
+    "player_idle_1": { "frame": { "x": 0, "y": 0, "w": 32, "h": 32 } },
+    "player_idle_2": { "frame": { "x": 32, "y": 0, "w": 32, "h": 32 } },
+    "player_idle_3": { "frame": { "x": 64, "y": 0, "w": 32, "h": 32 } },
+    "player_idle_4": { "frame": { "x": 96, "y": 0, "w": 32, "h": 32 } },
+    "player_idle_5": { "frame": { "x": 128, "y": 0, "w": 32, "h": 32 } },
+    "player_idle_6": { "frame": { "x": 160, "y": 0, "w": 32, "h": 32 } },
+    
+    "player_walk_1": { "frame": { "x": 0, "y": 32, "w": 32, "h": 32 } },
+    "player_walk_2": { "frame": { "x": 32, "y": 32, "w": 32, "h": 32 } },
+    "player_walk_3": { "frame": { "x": 64, "y": 32, "w": 32, "h": 32 } },
+    "player_walk_4": { "frame": { "x": 96, "y": 32, "w": 32, "h": 32 } },
+    "player_walk_5": { "frame": { "x": 128, "y": 32, "w": 32, "h": 32 } },
+    "player_walk_6": { "frame": { "x": 160, "y": 32, "w": 32, "h": 32 } },
+    "player_walk_7": { "frame": { "x": 192, "y": 32, "w": 32, "h": 32 } },
+    "player_walk_8": { "frame": { "x": 224, "y": 32, "w": 32, "h": 32 } },
+    
+    "player_attack1_1": { "frame": { "x": 0, "y": 64, "w": 32, "h": 32 } },
+    "player_attack1_2": { "frame": { "x": 32, "y": 64, "w": 32, "h": 32 } },
+    "player_attack1_3": { "frame": { "x": 64, "y": 64, "w": 32, "h": 32 } },
+    "player_attack1_4": { "frame": { "x": 96, "y": 64, "w": 32, "h": 32 } },
+    "player_attack1_5": { "frame": { "x": 128, "y": 64, "w": 32, "h": 32 } },
+    "player_attack1_6": { "frame": { "x": 160, "y": 64, "w": 32, "h": 32 } },
+    
+    "player_attack2_1": { "frame": { "x": 0, "y": 96, "w": 32, "h": 32 } },
+    "player_attack2_2": { "frame": { "x": 32, "y": 96, "w": 32, "h": 32 } },
+    "player_attack2_3": { "frame": { "x": 64, "y": 96, "w": 32, "h": 32 } },
+    "player_attack2_4": { "frame": { "x": 96, "y": 96, "w": 32, "h": 32 } },
+    "player_attack2_5": { "frame": { "x": 128, "y": 96, "w": 32, "h": 32 } },
+    "player_attack2_6": { "frame": { "x": 160, "y": 96, "w": 32, "h": 32 } },
+    
+    "player_attack3_1": { "frame": { "x": 0, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_2": { "frame": { "x": 32, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_3": { "frame": { "x": 64, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_4": { "frame": { "x": 96, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_5": { "frame": { "x": 128, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_6": { "frame": { "x": 160, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_7": { "frame": { "x": 192, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_8": { "frame": { "x": 224, "y": 128, "w": 32, "h": 32 } },
+    "player_attack3_9": { "frame": { "x": 256, "y": 128, "w": 32, "h": 32 } },
+    
+    "player_hurt_1": { "frame": { "x": 0, "y": 160, "w": 32, "h": 32 } },
+    "player_hurt_2": { "frame": { "x": 32, "y": 160, "w": 32, "h": 32 } },
+    "player_hurt_3": { "frame": { "x": 64, "y": 160, "w": 32, "h": 32 } },
+    "player_hurt_4": { "frame": { "x": 96, "y": 160, "w": 32, "h": 32 } },
+    
+    "player_death_1": { "frame": { "x": 0, "y": 192, "w": 32, "h": 32 } },
+    "player_death_2": { "frame": { "x": 32, "y": 192, "w": 32, "h": 32 } },
+    "player_death_3": { "frame": { "x": 64, "y": 192, "w": 32, "h": 32 } },
+    "player_death_4": { "frame": { "x": 96, "y": 192, "w": 32, "h": 32 } }
+  },
+  "animations": {
+    "player_idle": ["player_idle_1", "player_idle_2", "player_idle_3", "player_idle_4", "player_idle_5", "player_idle_6"],
+    "player_walk": ["player_walk_1", "player_walk_2", "player_walk_3", "player_walk_4", "player_walk_5", "player_walk_6", "player_walk_7", "player_walk_8"],
+    "player_attack1": ["player_attack1_1", "player_attack1_2", "player_attack1_3", "player_attack1_4", "player_attack1_5", "player_attack1_6"],
+    "player_attack2": ["player_attack2_1", "player_attack2_2", "player_attack2_3", "player_attack2_4", "player_attack2_5", "player_attack2_6"],
+    "player_attack3": ["player_attack3_1", "player_attack3_2", "player_attack3_3", "player_attack3_4", "player_attack3_5", "player_attack3_6", "player_attack3_7", "player_attack3_8", "player_attack3_9"],
+    "player_hurt": ["player_hurt_1", "player_hurt_2", "player_hurt_3", "player_hurt_4"],
+    "player_death": ["player_death_1", "player_death_2", "player_death_3", "player_death_4"]
+  }
+}

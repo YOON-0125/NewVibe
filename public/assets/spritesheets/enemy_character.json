@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "image": "enemy_character.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 256,
+      "h": 192
+    },
+    "scale": "1"
+  },
+  "frames": {
+    "enemy_idle_1": { "frame": { "x": 0, "y": 0, "w": 32, "h": 32 } },
+    "enemy_idle_2": { "frame": { "x": 32, "y": 0, "w": 32, "h": 32 } },
+    "enemy_idle_3": { "frame": { "x": 64, "y": 0, "w": 32, "h": 32 } },
+    "enemy_idle_4": { "frame": { "x": 96, "y": 0, "w": 32, "h": 32 } },
+    "enemy_idle_5": { "frame": { "x": 128, "y": 0, "w": 32, "h": 32 } },
+    "enemy_idle_6": { "frame": { "x": 160, "y": 0, "w": 32, "h": 32 } },
+    
+    "enemy_walk_1": { "frame": { "x": 0, "y": 32, "w": 32, "h": 32 } },
+    "enemy_walk_2": { "frame": { "x": 32, "y": 32, "w": 32, "h": 32 } },
+    "enemy_walk_3": { "frame": { "x": 64, "y": 32, "w": 32, "h": 32 } },
+    "enemy_walk_4": { "frame": { "x": 96, "y": 32, "w": 32, "h": 32 } },
+    "enemy_walk_5": { "frame": { "x": 128, "y": 32, "w": 32, "h": 32 } },
+    "enemy_walk_6": { "frame": { "x": 160, "y": 32, "w": 32, "h": 32 } },
+    "enemy_walk_7": { "frame": { "x": 192, "y": 32, "w": 32, "h": 32 } },
+    "enemy_walk_8": { "frame": { "x": 224, "y": 32, "w": 32, "h": 32 } },
+    
+    "enemy_attack1_1": { "frame": { "x": 0, "y": 64, "w": 32, "h": 32 } },
+    "enemy_attack1_2": { "frame": { "x": 32, "y": 64, "w": 32, "h": 32 } },
+    "enemy_attack1_3": { "frame": { "x": 64, "y": 64, "w": 32, "h": 32 } },
+    "enemy_attack1_4": { "frame": { "x": 96, "y": 64, "w": 32, "h": 32 } },
+    "enemy_attack1_5": { "frame": { "x": 128, "y": 64, "w": 32, "h": 32 } },
+    "enemy_attack1_6": { "frame": { "x": 160, "y": 64, "w": 32, "h": 32 } },
+    
+    "enemy_attack2_1": { "frame": { "x": 0, "y": 96, "w": 32, "h": 32 } },
+    "enemy_attack2_2": { "frame": { "x": 32, "y": 96, "w": 32, "h": 32 } },
+    "enemy_attack2_3": { "frame": { "x": 64, "y": 96, "w": 32, "h": 32 } },
+    "enemy_attack2_4": { "frame": { "x": 96, "y": 96, "w": 32, "h": 32 } },
+    "enemy_attack2_5": { "frame": { "x": 128, "y": 96, "w": 32, "h": 32 } },
+    "enemy_attack2_6": { "frame": { "x": 160, "y": 96, "w": 32, "h": 32 } },
+    
+    "enemy_hurt_1": { "frame": { "x": 0, "y": 128, "w": 32, "h": 32 } },
+    "enemy_hurt_2": { "frame": { "x": 32, "y": 128, "w": 32, "h": 32 } },
+    "enemy_hurt_3": { "frame": { "x": 64, "y": 128, "w": 32, "h": 32 } },
+    "enemy_hurt_4": { "frame": { "x": 96, "y": 128, "w": 32, "h": 32 } },
+    
+    "enemy_death_1": { "frame": { "x": 0, "y": 160, "w": 32, "h": 32 } },
+    "enemy_death_2": { "frame": { "x": 32, "y": 160, "w": 32, "h": 32 } },
+    "enemy_death_3": { "frame": { "x": 64, "y": 160, "w": 32, "h": 32 } },
+    "enemy_death_4": { "frame": { "x": 96, "y": 160, "w": 32, "h": 32 } }
+  },
+  "animations": {
+    "enemy_idle": ["enemy_idle_1", "enemy_idle_2", "enemy_idle_3", "enemy_idle_4", "enemy_idle_5", "enemy_idle_6"],
+    "enemy_walk": ["enemy_walk_1", "enemy_walk_2", "enemy_walk_3", "enemy_walk_4", "enemy_walk_5", "enemy_walk_6", "enemy_walk_7", "enemy_walk_8"],
+    "enemy_attack1": ["enemy_attack1_1", "enemy_attack1_2", "enemy_attack1_3", "enemy_attack1_4", "enemy_attack1_5", "enemy_attack1_6"],
+    "enemy_attack2": ["enemy_attack2_1", "enemy_attack2_2", "enemy_attack2_3", "enemy_attack2_4", "enemy_attack2_5", "enemy_attack2_6"],
+    "enemy_hurt": ["enemy_hurt_1", "enemy_hurt_2", "enemy_hurt_3", "enemy_hurt_4"],
+    "enemy_death": ["enemy_death_1", "enemy_death_2", "enemy_death_3", "enemy_death_4"]
+  }
+}
