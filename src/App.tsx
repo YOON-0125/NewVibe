@@ -3,6 +3,7 @@ import GameCanvas from './components/GameCanvas';
 import HUD from './components/HUD';
 import MainMenu from './components/MainMenu';
 import LevelUp from './components/LevelUp';
+import GameOver from './components/GameOver';
 import { GameStateProvider } from './contexts/GameStateContext';
 import './App.css';
 
@@ -14,6 +15,7 @@ function App() {
         <HUD />
         <GameCanvas />
         <LevelUp />
+        <GameOver />
       </div>
     </GameStateProvider>
   );

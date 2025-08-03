@@ -25,12 +25,24 @@ const GameCanvas: React.FC = () => {
   useEffect(() => {
     if (gameEngineRef.current) {
       if (state.isPlaying && !state.isPaused) {
-        gameEngineRef.current.start();
+        // 게임이 처음 시작되거나 재시작 시에만 restart 호출
+        if (state.player.level === 1 && state.time === 0) {
+          gameEngineRef.current.restart();
+        } else {
+          gameEngineRef.current.start();
+        }
       } else {
         gameEngineRef.current.pause();
       }
     }
-  }, [state.isPlaying, state.isPaused]);
+  }, [state.isPlaying, state.isPaused, state.player.level, state.time]);
+
+  // 플레이어 상태를 GameEngine에 전달
+  useEffect(() => {
+    if (gameEngineRef.current) {
+      gameEngineRef.current.updatePlayerStats(state.player.level, state.player.health);
+    }
+  }, [state.player.level, state.player.health]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!gameEngineRef.current || !state.isPlaying || state.isPaused) return;

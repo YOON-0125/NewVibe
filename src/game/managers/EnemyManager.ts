@@ -5,19 +5,20 @@ import { Vector2 } from '../entities/Player';
 export class EnemyManager {
   private enemies: Enemy[] = [];
   private spawnTimer: number = 0;
-  private spawnInterval: number = 2; // 2초마다 스폰
+  private spawnInterval: number = 0.67; // 1.5초마다 적 생성
   private maxEnemies: number = 50;
+  private currentPlayerLevel: number = 1;
 
   update(deltaTime: number, playerPosition: Vector2, stage: PIXI.Container): void {
     // 적 스폰
     this.spawnTimer += deltaTime;
     if (this.spawnTimer >= this.spawnInterval && this.enemies.length < this.maxEnemies) {
-      this.spawnEnemy(stage);
+      this.spawnEnemies(stage);
       this.spawnTimer = 0;
     }
 
     // 모든 적 업데이트
-    this.enemies.forEach(enemy => {
+    this.enemies.forEach((enemy) => {
       enemy.update(deltaTime, playerPosition);
     });
 
@@ -25,14 +26,23 @@ export class EnemyManager {
     this.removeOffscreenEnemies(stage);
   }
 
-  private spawnEnemy(stage: PIXI.Container): void {
+  private spawnEnemies(stage: PIXI.Container): void {
+    // 레벨에 따른 스폰 수 계산: 5레벨당 1마리씩 추가
+    const spawnCount = Math.floor(this.currentPlayerLevel / 5) + 1;
+
+    for (let i = 0; i < spawnCount; i++) {
+      this.spawnSingleEnemy(stage);
+    }
+  }
+
+  private spawnSingleEnemy(stage: PIXI.Container): void {
     // 화면 경계에서 랜덤 위치에 스폰
     const screenWidth = 375;
     const screenHeight = 455;
     const margin = 50;
-    
+
     let x: number, y: number;
-    
+
     // 화면 가장자리에서 스폰
     const side = Math.floor(Math.random() * 4);
     switch (side) {
@@ -65,12 +75,12 @@ export class EnemyManager {
     const screenHeight = 455;
     const margin = 100;
 
-    this.enemies = this.enemies.filter(enemy => {
+    this.enemies = this.enemies.filter((enemy) => {
       const pos = enemy.getPosition();
-      const isOffscreen = 
-        pos.x < -margin || 
-        pos.x > screenWidth + margin || 
-        pos.y < -margin || 
+      const isOffscreen =
+        pos.x < -margin ||
+        pos.x > screenWidth + margin ||
+        pos.y < -margin ||
         pos.y > screenHeight + margin;
 
       if (isOffscreen) {
@@ -93,9 +103,13 @@ export class EnemyManager {
   }
 
   clear(stage: PIXI.Container): void {
-    this.enemies.forEach(enemy => {
+    this.enemies.forEach((enemy) => {
       stage.removeChild(enemy.sprite as unknown as PIXI.DisplayObject);
     });
     this.enemies = [];
+  }
+
+  updatePlayerLevel(level: number): void {
+    this.currentPlayerLevel = level;
   }
 }
