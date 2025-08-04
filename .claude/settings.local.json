@@ -11,7 +11,8 @@
       "Bash(pkill:*)",
       "Bash(taskkill:*)",
       "Bash(cmd /c:*)",
-      "Bash(set PORT=3001)"
+      "Bash(set PORT=3001)",
+      "WebFetch(domain:inpa.tistory.com)"
     ],
     "deny": []
   }

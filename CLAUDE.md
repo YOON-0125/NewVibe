@@ -16,15 +16,6 @@
 - **목표**: 15분 생존
 - **성장**: 레벨업 시 3가지 강화 중 선택
 
-## 🎮 게임 시스템
-
-### 기본 메커니즘
-
-1. **이동**: 터치/클릭한 지점으로 플레이어 이동
-2. **자동 공격**: 무기가 가까운 적 자동 타겟팅
-3. **경험치**: 적 처치 시 경험치 드롭, 수집 시 레벨업
-4. **업그레이드**: 레벨업 시 3가지 선택지 제시
-
 ### 무기 시스템 (단순화)
 
 - **궤도탄**: 플레이어 주변 도는 투사체
@@ -209,7 +200,7 @@
 
 # 📋 구현 완료 현황 (업데이트됨)
 
-## 🎯 **전체 진행률: 약 70% 완료**
+## 🎯 **전체 진행률: 약 80% 완료**
 
 ### ✅ **Week 1-2: 핵심 게임플레이 완료 (100%)**
 
@@ -275,130 +266,182 @@ src/
 └── App.tsx              # 메인 앱 구조
 ```
 
-### ⚠️ **부분 완료 사항**
+### ✅ **추가 완료 사항 (Week 3)**
 
-#### 🛡️ **방어막 무기 시스템**
-- **설계 완료**: 상태 관리, UI 아이콘 준비
-- **미구현**: 실제 게임 엔진 내 방어막 로직
+#### 🔥 **난이도 스케일링 시스템**
+- **완료**: 클리어 시 적 스탯 25% 증가 메커니즘
+- **완료**: HUD에 난이도 레벨 표시 (🔥숫자)
+- **완료**: 적 색상 변화로 난이도 시각화
+- **완료**: 재시작 시 난이도 유지, 메인메뉴 이동 시 초기화
 
-#### 🔧 **업그레이드 효과 연동**
-- **UI 완료**: 레벨업 시 상태 업데이트
-- **부분 연동**: 일부 효과가 게임플레이에 반영 안됨
+#### 🏆 **승리 화면 UI**
+- **완료**: 15분 클리어 시 승리 화면 표시
+- **완료**: 게임 결과 통계 (레벨, 점수, 시간)
+- **완료**: 난이도 변화 표시 (이전 → 현재)
+- **완료**: Continue/Main Menu 버튼
 
-### ❌ **미구현 사항 (Week 3-4)**
+### ✅ **최근 완료된 주요 작업 (Gemini)**
 
-#### 🏆 **메타 진행 시스템**
-- 유물 시스템 (8-10개 유물)
-- 클리어 시 유물 선택 UI
-- 난이도 스케일링 (클리어 시 +25%)
-- LocalStorage 데이터 저장
+#### 🛡️ **방어막 무기 시스템 (롤백 및 재구현)**
+- **문제점**: 초기 방어막 구현 시 데미지 미적용 및 통계 누락 문제 발생. 회전 구체 형태로 변경 시도했으나, 기능 미작동 및 복잡도 증가로 롤백 결정.
+- **해결**:
+    - `GameStateContext.tsx`: `shield` 무기 타입을 `{ level, damage, radius, cooldown }`으로 재정의.
+    - `WeaponManager.ts`:
+        - 방어막을 단일 반투명 원(`PIXI.Graphics`)으로 구현.
+        - `updateShield` 메서드는 시각적 업데이트 및 쿨다운 관리만 담당.
+        - `getShieldDamageTargets()` 메서드를 추가하여, 방어막 범위 내의 적 목록을 반환하도록 변경.
+    - `GameEngine.ts`:
+        - `gameLoop`에서 `weaponManager.getShieldDamageTargets()`를 호출하여 데미지 대상 적 목록을 가져옴.
+        - 가져온 적들에게 `handleDamageEvent()`를 통해 데미지를 적용하고 통계를 기록하도록 중앙화.
+    - `LevelUp.tsx`: 방어막 업그레이드 시 `damage`, `radius`, `cooldown`이 증가하도록 로직 수정.
+- **결과**: 방어막이 정상적으로 데미지를 입히고 통계에 반영됨.
+
+#### 📊 **전투 통계 시스템 구축**
+- **목표**: 게임 승리 시 "적 처치 수, 경험치, 무기별 처치 수, 최대 데미지를 낸 무기와 최대 데미지"를 표시.
+- **구현**:
+    - `GameStateContext.tsx`:
+        - `GameStats` 인터페이스 정의 (`enemiesKilled`, `experienceGained`, `damageDealt`, `weaponStats`, `highestDamage`).
+        - `GameState`에 `stats: GameStats` 속성 추가 및 초기화 로직 구현.
+        - `UPDATE_STATS` 액션 타입 추가 및 리듀서 로직 구현.
+    - `GameEngine.ts`:
+        - `handleDamageEvent()` 메서드를 중앙 데미지 처리 및 통계 기록 함수로 리팩토링.
+        - 적 처치 및 데미지 발생 시 `UPDATE_STATS` 액션을 `dispatch`하여 통계 업데이트.
+    - `Victory.tsx`: `GameState`의 `stats` 데이터를 활용하여 승리 화면에 상세 전투 통계 표시.
+- **결과**: 게임 승리 시 상세한 전투 통계가 정상적으로 표시됨.
+
+#### 🔄 **플레이어 체력/경험치 업데이트 문제 해결**
+- **문제점**: 통계 시스템 도입 후 플레이어 체력 및 경험치 업데이트가 고정되거나 누락되는 현상 발생.
+- **원인**: 여러 `dispatch` 호출이 한 프레임 내에서 충돌하여 상태 업데이트가 덮어쓰여짐.
+- **해결**:
+    - `GameEngine.ts`:
+        - 플레이어 체력 업데이트를 `gameLoop`의 `UPDATE_PLAYER` 액션에 통합.
+        - 적 처치 시 경험치/점수 `dispatch`를 제거하고, 모든 통계 관련 업데이트를 `UPDATE_STATS` 액션으로 통일.
+    - `GameStateContext.tsx`: `UPDATE_STATS` 리듀서에서 통계뿐만 아니라 경험치 및 점수 증가, 레벨업 처리까지 모두 담당하도록 로직 통합.
+- **결과**: 플레이어 체력 및 경험치가 실시간으로 정확하게 업데이트됨.
+
+#### 👾 **적 겹침 및 충돌 문제 해결**
+- **문제점**: 적들이 한 점에 겹쳐서 자동 공격이 인식하지 못하고, 플레이어 피격이 제대로 되지 않으며, 새로운 적 스폰이 멈추는 문제 발생.
+- **원인**: 적들이 서로의 위치를 고려하지 않고 플레이어만 추적하여 겹침 현상 발생. 플레이어 피격 로직이 무적 시간 동안 모든 충돌을 무시하여 데미지 누락.
+- **해결**:
+    - `Enemy.ts`:
+        - `update` 메서드에 `otherEnemies` 인자를 추가하여 다른 적들과의 **분리(Separation) 로직** 구현. (서로 겹치지 않도록 밀어내는 힘 적용)
+        - `isInvincible()` 메서드를 추가하여 플레이어의 무적 상태를 외부에 노출.
+    - `EnemyManager.ts`:
+        - `update` 메서드에서 각 적의 `update` 호출 시, 해당 적을 제외한 `allEnemies` 배열을 전달.
+    - `GameEngine.ts`:
+        - `handleCollisions`에서 플레이어 피격 로직을 수정. `collisions.playerEnemyCollisions`가 존재하고 플레이어가 무적 상태가 아닐 때만 **단 한 번** 데미지를 적용하도록 변경.
+- **결과**: 적들이 더 이상 겹치지 않고 자연스럽게 퍼지며, 플레이어 피격이 무적 시간과 연동되어 정확하게 작동함.
+
+#### ♻️ **적 클래스 리팩토링 및 '추적자' 구현 (1단계)**
+- **목표**: 다양한 적 타입을 유연하게 추가할 수 있는 구조 마련 및 '추적자' 적 구현.
+- **구현**:
+    - `src/game/entities/behaviors` 폴더 신설.
+    - `IEnemyBehavior.ts` 인터페이스 정의 (적 행동 패턴의 계약).
+    - `Enemy.ts` 리팩토링:
+        - `EnemyType` enum 추가 (`Basic`, `Chaser`, `Giant`, `Sniper`).
+        - 생성자에서 `EnemyType`과 `IEnemyBehavior`를 주입받도록 변경.
+        - `createSprite` 메서드를 적 타입에 따라 다른 모양과 색상을 그리도록 수정.
+        - `update` 메서드가 주입된 `behavior.update()`를 호출하도록 위임.
+        - `setPosition`, `getSpeed` 등 필요한 getter/setter 추가.
+    - `BasicChaserBehavior.ts` 구현: 기존의 플레이어 추적 및 적 분리 로직을 이 클래스로 이동.
+    - `EnemyManager.ts`:
+        - `update` 메서드에서 `gameTime`을 받아 `getEnemyTypeForCurrentTime()`을 통해 현재 시간에 맞는 적 타입을 결정.
+        - `getBehaviorForType()`을 통해 해당 타입에 맞는 `IEnemyBehavior` 인스턴스를 반환.
+        - `Enemy` 생성 시 새로운 생성자 시그니처에 맞춰 `EnemyType`과 `behavior`를 전달.
+- **결과**: 새로운 적 타입을 쉽게 추가할 수 있는 확장성 있는 구조가 마련되었으며, 게임 시간에 따라 '추적자' 적이 정상적으로 스폰됨.
+
+#### 👾 **새로운 적 타입 구현 (2단계: 거인, 3단계: 저격수)**
+- **목표**: `enemy_basic.md`에 명시된 '거인'과 '저격수' 적을 구현하고 게임에 통합.
+- **구현**:
+    - **거인 (Giant)**:
+        - `GiantBehavior.ts` 구현: `BasicChaserBehavior`를 상속받아 느린 추적 행동 구현.
+        - `EnemyManager.ts`:
+            - `getEnemyTypeForCurrentTime()`에 `EnemyType.Giant` 스폰 확률 추가 (게임 시간 2분부터).
+            - `getBehaviorForType()`에서 `EnemyType.Giant`에 `GiantBehavior` 반환.
+            - `removeEnemy()` 메서드에 거인(`EnemyType.Giant`) 사망 시 `spawnSplitEnemies()` 호출 로직 추가.
+            - `spawnSplitEnemies()` 구현: 거인 사망 위치에 `EnemyType.Basic` 적들을 여러 마리(게임 시간에 따라 증가) 생성하여 퍼뜨림.
+    - **저격수 (Sniper)**:
+        - `SniperBehavior.ts` 구현: `IEnemyBehavior`를 구현하여 플레이어와 거리 유지 및 원거리 공격 로직 포함.
+        - `WeaponManager.ts`:
+            - `Projectile` 인터페이스에 `isEnemyProjectile` 속성 추가.
+            - `fireEnemyProjectile()` 메서드 추가: 적이 투사체를 발사할 수 있도록 구현 (색상, 크기 다르게).
+            - `createProjectile()` 수정: `isEnemyProjectile` 인자를 받아 적 투사체 생성 로직 포함.
+        - `CollisionManager.ts`:
+            - `CollisionResult`에 `enemyProjectilePlayerCollisions` 추가.
+            - `checkCollisions()` 수정: 적 투사체와 플레이어 간의 충돌을 감지하여 `enemyProjectilePlayerCollisions`에 추가.
+        - `GameEngine.ts`:
+            - `gameLoop`에서 `weaponManager.fireProjectiles()` 호출 시 `enemies` 인자 전달.
+            - `handleCollisions()` 수정: `enemyProjectilePlayerCollisions`를 순회하며 플레이어에게 데미지 적용 및 투사체 제거.
+        - `EnemyManager.ts`:
+            - 생성자에서 `WeaponManager` 인스턴스를 주입받도록 변경.
+            - `EnemyUpdateContext`에 `weaponManager`와 `stage`를 추가하여 `SniperBehavior`에서 접근 가능하도록 함.
+            - `getEnemyTypeForCurrentTime()`에 `EnemyType.Sniper` 스폰 확률 추가 (게임 시간 5분부터).
+            - `getBehaviorForType()`에서 `EnemyType.Sniper`에 `SniperBehavior` 반환.
+- **결과**: '거인'과 '저격수' 적이 게임에 성공적으로 통합되었으며, 각자의 행동 패턴(분열, 원거리 공격)을 정상적으로 수행함.
+
+#### 🎁 유물 시스템 구현 및 관련 버그 수정
+- **목표**: 게임의 핵심 재플레이 요소인 '유물' 시스템을 구현하고, 이 과정에서 발생한 다양한 버그를 해결하여 유물 효과가 정상적으로 누적 적용되도록 함.
+- **구현**:
+    - **데이터 정의 및 저장**:
+        - `src/data/artifacts.ts`: 모든 유물의 ID, 이름, 설명, 효과(합연산/곱연산, 적용 능력치 경로)를 정의하는 중앙 데이터베이스 구축.
+        - `src/utils/storage.ts`: 플레이어가 획득한 유물 ID 목록을 `LocalStorage`에 저장하고 불러오는 유틸리티 함수 구현.
+    - **상태 관리 통합**:
+        - `src/contexts/GameStateContext.tsx`:
+            - `GameState` 인터페이스에 `ownedArtifacts: ArtifactID[]` 속성 추가 및 `player.speed` 속성 추가.
+            - `initialState`에서 `loadOwnedArtifacts()`를 통해 보유 유물 목록을 초기화.
+            - **`START_NEW_ROUND` 액션 도입**: 유물 획득(`newArtifactId`)과 다음 라운드 시작을 하나의 원자적 액션으로 통합. 이 리듀서는 `initialState`를 기반으로 라운드별 초기화가 필요한 속성(`score`, `time`, `stats` 등)만 리셋하고, `ownedArtifacts`, `difficulty`, `player`, `weapons` 등 **유물 효과로 강화된 능력치들은 이전 라운드의 상태를 유지**하도록 로직을 개선.
+            - `applyArtifacts` 함수를 리듀서 내부에서 호출하여, 유물 효과가 적용된 최종 `GameState`를 직접 반환하도록 하여 `GameState` 자체가 항상 "진실의 원천"이 되도록 함.
+    - **유물 효과 적용 로직**:
+        - `src/game/systems/ArtifactSystem.ts`: `applyArtifacts` 함수 구현. `GameState`와 `ownedArtifacts`를 받아, 유물 효과(합연산/곱연산)를 순서대로 적용하여 강화된 `GameState`를 반환. 특히 `stat` 경로의 깊이(`player.speed` vs `weapons.projectile.damage`)를 정확히 파악하여 해당 능력치에 값을 적용하도록 개선.
+    - **게임 엔진 연동**:
+        - `src/components/GameCanvas.tsx`: `state.isPlaying` 상태 변화 시 `applyArtifacts`를 호출하여 유물 효과가 적용된 `finalState`를 계산하고, `gameEngine.restart(finalState)`를 호출하여 엔진을 초기화하고 새로운 상태를 반영.
+        - `src/game/GameEngine.ts`:
+            - `start(initialState)` 및 `restart(initialState)` 메서드가 유물 효과가 적용된 `GameState`를 받아 엔진 내부의 플레이어(`this.player.speed`, `this.player.maxHealth`) 및 무기 관련 속성들을 업데이트하도록 수정.
+            - `updateFromGameState` 메서드에서 `GameState`의 플레이어 및 무기 속성을 `GameEngine` 내부 속성에 정확히 반영하도록 로직 개선.
+    - **UI 및 기타 수정**:
+        - `src/components/Victory.tsx`: 승리 화면에서 유물 선택 UI를 `ui_layout.md`에 명시된 카드 형태로 표시되도록 스타일 수정. 유물 선택 시 `START_NEW_ROUND` 액션을 디스패치하도록 변경.
+        - `src/components/GameOver.tsx`: 게임 오버 후 재시작 시 `START_NEW_ROUND` 액션을 사용하도록 변경.
+        - `src/index.css`: Tailwind CSS 클래스들이 정상적으로 적용되도록 `@tailwind` 지시문 추가.
+        - `src/game/entities/Player.ts`: `Player` 클래스에 `public speed` 및 `public maxHealth` 속성 추가.
+        - `src/game/managers/WeaponManager.ts`: `OrbitalWeaponInstance` 인터페이스 도입 및 `orbitalWeapons` 배열 타입 변경, `addOrbitalWeapon` 메서드에 `damage` 인자 추가, `updateWeaponStats`에서 모든 무기 속성을 `GameState`에 따라 업데이트하도록 로직 확장.
+- **결과**:
+    - 유물 효과가 매 라운드마다 정상적으로 누적 적용됨 (예: 직선탄 데미지 `15 -> 18.75 -> 20.625`).
+    - 난이도 증가 메커니즘이 정상적으로 작동하여 다음 라운드에 반영됨.
+    - 승리 화면의 유물 선택 UI가 의도한 대로 카드 형태로 표시됨.
+    - 게임 재시작 시 무한 루프 및 상태 초기화 문제가 해결됨.
+    - 이 과정에서 발생했던 수많은 타입스크립트 및 문법 오류들이 해결되어 코드의 안정성이 향상됨.
+
+### ❌ **미구현 사항 (추후 개발)**
+
+#### 🔧 **업그레이드 효과 연동 (부분 완료)**
+- **문제점**: 일부 업그레이드 효과(예: 플레이어 이동 속도 증가)가 UI에만 반영되고 실제 게임플레이에 적용되지 않음.
+- **구현 필요**: `LevelUp.tsx`에서 선택된 업그레이드가 `Player` 클래스 또는 관련 매니저에 실제 능력치 변화를 적용하도록 연동.
+
+#### 🎁 **유물 시스템**
+- **목표**: 게임의 핵심 재플레이 요소인 '유물' 시스템 구현.
+- **구현 필요**:
+    - 유물 데이터 정의 (8-10개 유물).
+    - 유물 효과 구현 및 적용 (영구적 능력 강화).
+    - 승리 시 유물 3개 중 하나를 선택하는 UI 및 로직 구현.
+    - 유물 보관함 UI.
+
+#### 💾 **데이터 저장 시스템**
+- **목표**: 게임 진행 데이터(클리어 횟수, 보유 유물) 및 통계 데이터(최고 기록, 플레이 시간) 영구 저장.
+- **구현 필요**: `LocalStorage` 기반 저장/로드 시스템.
 
 #### 📱 **모바일 앱 변환**
-- Capacitor 프로젝트 설정
-- 네이티브 기능 (햅틱 피드백)
-- 성능 최적화 (30fps 제한, 오브젝트 풀링)
+- **목표**: Capacitor를 사용하여 웹 게임을 모바일 앱으로 변환.
+- **구현 필요**:
+    - Capacitor 프로젝트 설정 및 빌드.
+    - 네이티브 기능(햅틱 피드백 등) 연동.
+    - WebView 환경에서의 성능 최적화 (30fps 제한, 오브젝트 풀링 등).
 
-## 🔧 **기술적 구현 세부사항**
-
-### 📋 **핵심 클래스 구조**
-
-#### GameEngine.ts
-- **게임 루프**: 60fps PIXI ticker, delta time 계산
-- **상태 동기화**: React 상태와 실시간 연동
-- **충돌 시스템**: CollisionManager 통합
-- **시간 관리**: 15분 생존 목표, 게임 시간 추적
-
-#### Player.ts
-- **이동 시스템**: 부드러운 타겟 기반 이동 (150px/s)
-- **무적시간**: 1초 무적, 시각적 피드백
-- **스프라이트**: 파란 원 (반지름 15px), 흰색 테두리
-
-#### EnemyManager.ts
-- **스폰 시스템**: 0.67초마다 화면 가장자리에서 스폰
-- **레벨 스케일링**: 5레벨마다 동시 스폰 수 증가
-- **AI**: 플레이어 추적, 화면 밖 자동 제거
-
-#### WeaponManager.ts
-- **궤도탄**: 플레이어 중심 회전, 3px 반지름
-- **직선탄**: 가장 가까운 적 자동 조준, 200px/s 속도
-- **자동 공격**: 실시간 타겟팅, 투사체 생명주기 관리
-
-### 🎮 **게임플레이 밸런싱**
-
-#### 데미지 시스템
-- **플레이어 받는 데미지**: 10 + (레벨-1) × 0.5
-- **무기 데미지**: 투사체 15, 궤도탄 접촉 시
-- **적 체력**: 30 HP
-- **경험치**: 적당 10 XP
-
-#### 난이도 곡선
-- **적 스폰**: 레벨 1-4 (1마리) → 5-9 (2마리) → 10-14 (3마리)
-- **필요 경험치**: 매 레벨업마다 20% 증가
-- **생존 목표**: 15분 (900초)
-
-### 🐛 **해결된 주요 이슈들**
-
-#### 1. **무적시간 시스템**
-- **문제**: 0.1초 무적시간이 너무 짧아서 효과 없음
-- **해결**: 1초로 연장, 시각적 피드백 강화
-
-#### 2. **게임시간 초기화**
-- **문제**: 레벨업 시 게임시간이 0으로 리셋
-- **해결**: start()와 restart() 메서드 분리
-
-#### 3. **게임오버 UI**
-- **문제**: App.css overflow:hidden으로 인해 모달 안보임  
-- **해결**: React Portal로 document.body에 직접 렌더링
-
-#### 4. **충돌 데미지**
-- **문제**: 한 번 충돌 후 더 이상 데미지 안받음
-- **해결**: 무적시간 시스템과 currentPlayerHealth 동기화
-
-## 📊 **성능 & 최적화**
-
-### ✅ **현재 최적화**
-- **React 최적화**: useCallback, useMemo 적절히 사용
-- **PixiJS 최적화**: Graphics 객체 재사용, 스프라이트 풀링 기본 구조
-- **메모리 관리**: 화면 밖 오브젝트 자동 제거
-- **렌더링**: 필요시에만 스프라이트 업데이트
-
-### 🔄 **추가 예정 최적화**
-- 오브젝트 풀링 (적, 투사체)
-- 30fps 제한
-- 화면 밖 렌더링 스킵
-- 메모리 누수 방지
-
-## 🧪 **테스트 가능한 기능들**
-
-### ✅ **완전 동작**
-1. 플레이어 이동 (마우스 클릭/터치)
-2. 적 자동 스폰 및 추적
-3. 궤도탄, 직선탄 무기 공격
-4. 적 처치 시 경험치 획득
-5. 레벨업 시 업그레이드 선택
-6. 플레이어 데미지 및 무적시간
-7. 게임오버 시 결과 화면
-8. 재시작 및 메인메뉴 기능
-
-### ⚠️ **부분 동작**
-1. 업그레이드 효과 (UI만 동작, 일부 게임플레이 미연동)
-2. 방어막 무기 (아이콘만, 실제 기능 없음)
-
-## 🎯 **다음 우선순위**
-
-### 1. **방어막 무기 구현**
-- 플레이어 주변 회전하는 보호막
-- 적 투사체 차단 기능
-- 시각적 이펙트 추가
-
-### 2. **업그레이드 효과 연동**
-- 속도 업그레이드 → 실제 이동속도 증가
-- 체력 업그레이드 → 최대 체력 증가
-- 무기 업그레이드 → 데미지/개수 증가
-
-### 3. **유물 시스템**
-- 15분 클리어 시 유물 3개 중 선택
-- 영구적 능력 강화
-- 난이도 증가 메커니즘
+#### 🎨 **폴리싱 및 밸런싱**
+- **목표**: 게임의 완성도와 사용자 경험 향상.
+- **구현 필요**:
+    - 승리 화면 고도화 (애니메이션, 파티클, 사운드).
+    - 전반적인 게임 밸런싱 조정 (적 스폰, 무기 데미지, 레벨업 곡선 등).
+    - 사운드 시스템 추가.
+    - 추가적인 시각적 피드백 (예: 적 피격 이펙트).
 
 이 문서는 프로젝트의 현재 상태와 향후 계획을 정확히 반영하며, 개발 진행상황을 실시간으로 추적할 수 있도록 구성되었습니다.

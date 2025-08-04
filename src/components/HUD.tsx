@@ -25,6 +25,11 @@ const HUD: React.FC = () => {
         </div>
         <div className="right-info">
           <span className="timer">{formatTime(state.time)}</span>
+          {state.difficulty.level > 0 && (
+            <span className="difficulty" style={{ color: '#FF6B6B', fontSize: '12px', marginLeft: '8px' }}>
+              🔥{state.difficulty.level}
+            </span>
+          )}
         </div>
       </div>
 

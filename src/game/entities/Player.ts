@@ -5,11 +5,19 @@ export interface Vector2 {
   y: number;
 }
 
+// (Gemini) Player 클래스의 속성을 정의하는 인터페이스
+export interface IPlayer {
+  speed: number;
+  maxHealth: number;
+  // 필요한 경우 다른 속성도 여기에 추가
+}
+
 export class Player {
   public sprite: PIXI.Graphics;
   private position: Vector2;
   private targetPosition: Vector2;
-  private speed: number = 150; // pixels per second
+  public speed: number = 150; // pixels per second (Gemini) public으로 변경
+  public maxHealth: number = 100; // (Gemini) 최대 체력 추가
   private radius: number = 15;
   private invulnerabilityTimer: number = 0;
   private invulnerabilityDuration: number = 1; // 1초 무적시간
@@ -19,7 +27,6 @@ export class Player {
     this.position = { x, y };
     this.targetPosition = { x, y };
 
-    // 플레이어 스프라이트 생성 (기하학적 도형)
     this.sprite = new PIXI.Graphics();
     this.createSprite();
     this.updateSpritePosition();
@@ -31,16 +38,10 @@ export class Player {
 
   private updateSpriteAppearance(): void {
     this.sprite.clear();
-
-    // 무적시간일 때는 반투명하게 표시
     const alpha = this.isInvulnerable ? 0.5 : 1.0;
-
-    // 플레이어를 파란 원으로 표현
     this.sprite.beginFill(0x4a90e2, alpha);
     this.sprite.drawCircle(0, 0, this.radius);
     this.sprite.endFill();
-
-    // 테두리 추가
     this.sprite.lineStyle(2, 0xffffff, alpha);
     this.sprite.drawCircle(0, 0, this.radius);
   }
@@ -50,7 +51,6 @@ export class Player {
   }
 
   update(deltaTime: number): void {
-    // 무적시간 업데이트
     if (this.isInvulnerable) {
       this.invulnerabilityTimer -= deltaTime;
       if (this.invulnerabilityTimer <= 0) {
@@ -59,19 +59,15 @@ export class Player {
       }
     }
 
-    // 타겟 위치로 이동
     const dx = this.targetPosition.x - this.position.x;
     const dy = this.targetPosition.y - this.position.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance > 2) {
-      // 최소 이동 거리
       const moveDistance = this.speed * deltaTime;
       const ratio = Math.min(moveDistance / distance, 1);
-
       this.position.x += dx * ratio;
       this.position.y += dy * ratio;
-
       this.updateSpritePosition();
     }
   }
@@ -91,19 +87,26 @@ export class Player {
 
   takeDamage(damage: number): boolean {
     if (this.isInvulnerable) {
-      return false; // 무적시간 중에는 데미지 무시
+      return false;
     }
-
-    // 무적시간 시작
     this.isInvulnerable = true;
     this.invulnerabilityTimer = this.invulnerabilityDuration;
     this.updateSpriteAppearance();
-
     console.log(`Player took ${damage} damage`);
-    return true; // 데미지를 받았음을 반환
+    return true;
   }
 
-  isVulnerable(): boolean {
-    return !this.isInvulnerable;
+  // (Gemini) isInvincible 메서드 추가
+  isInvincible(): boolean {
+    return this.isInvulnerable;
+  }
+
+  resetPosition(x: number, y: number): void {
+    this.position = { x, y };
+    this.targetPosition = { x, y };
+    this.updateSpritePosition();
+    this.isInvulnerable = false;
+    this.invulnerabilityTimer = 0;
+    this.updateSpriteAppearance();
   }
 }

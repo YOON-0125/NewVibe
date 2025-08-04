@@ -57,8 +57,8 @@ const LevelUp: React.FC = () => {
       },
       {
         id: 'shield_upgrade',
-        name: '보호막 강화',
-        description: '보호막의 내구도와 회복속도가 증가합니다',
+        name: '방어막 강화',
+        description: '방어막의 범위와 데미지가 증가합니다',
         icon: '🛡️',
         effect: () => {
           dispatch({
@@ -67,8 +67,9 @@ const LevelUp: React.FC = () => {
               weapon: 'shield',
               updates: {
                 level: state.weapons.shield.level + 1,
-                health: state.weapons.shield.health + 25,
-                regeneration: state.weapons.shield.regeneration + 2
+                damage: state.weapons.shield.damage + 2,
+                radius: state.weapons.shield.radius + 10,
+                cooldown: Math.max(0.1, state.weapons.shield.cooldown * 0.95) // 5% 감소
               }
             }
           });

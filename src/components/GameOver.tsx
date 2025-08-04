@@ -15,53 +15,17 @@ const GameOver: React.FC = () => {
   console.log('GameOver component is rendering UI!');
 
   const handleRestart = () => {
-    // 게임 상태 초기화
-    dispatch({ type: 'START_GAME' });
-    
-    // 플레이어 상태 초기화
-    dispatch({
-      type: 'UPDATE_PLAYER',
-      payload: {
-        level: 1,
-        experience: 0,
-        experienceToNext: 100,
-        health: 100,
-        maxHealth: 100,
-        x: 187.5, // 375 / 2
-        y: 227.5, // 455 / 2
-      }
-    });
-
-    // 무기 상태 초기화
-    dispatch({
-      type: 'UPDATE_WEAPON',
-      payload: {
-        weapon: 'orbital',
-        updates: { level: 0, damage: 10, count: 0 }
-      }
-    });
-    dispatch({
-      type: 'UPDATE_WEAPON',
-      payload: {
-        weapon: 'projectile',
-        updates: { level: 0, damage: 15, speed: 200 }
-      }
-    });
-    dispatch({
-      type: 'UPDATE_WEAPON',
-      payload: {
-        weapon: 'shield',
-        updates: { level: 0, health: 0, regeneration: 0 }
-      }
-    });
-
-    // 점수와 시간 초기화
-    dispatch({ type: 'UPDATE_SCORE', payload: 0 });
-    dispatch({ type: 'UPDATE_TIME', payload: 0 });
+    // (Gemini) START_NEW_ROUND 액션으로 게임 재시작
+    dispatch({ type: 'START_NEW_ROUND', payload: { newArtifactId: null } });
   };
 
   const handleMainMenu = () => {
+    // 게임오버 상태를 먼저 해제하고 메인메뉴로 이동
     dispatch({ type: 'SHOW_MAIN_MENU' });
+    // 게임 상태를 완전히 초기화
+    setTimeout(() => {
+      window.location.reload(); // 완전한 초기화를 위해 페이지 새로고침
+    }, 100);
   };
 
   const gameOverModal = (
@@ -95,17 +59,17 @@ const GameOver: React.FC = () => {
         </div>
 
         {/* 버튼들 */}
-        <div className="space-y-3">
+        <div className="menu-buttons">
           <button
             onClick={handleRestart}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 text-lg"
+            className="menu-button primary"
           >
             재도전
           </button>
           
           <button
             onClick={handleMainMenu}
-            className="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 text-lg"
+            className="menu-button secondary"
           >
             메인 메뉴
           </button>

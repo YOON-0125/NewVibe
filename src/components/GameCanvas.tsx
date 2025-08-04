@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useGameState } from '../contexts/GameStateContext';
 import { GameEngine } from '../game/GameEngine';
+import { applyArtifacts } from '../game/systems/ArtifactSystem';
 
 const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -25,24 +26,26 @@ const GameCanvas: React.FC = () => {
   useEffect(() => {
     if (gameEngineRef.current) {
       if (state.isPlaying && !state.isPaused) {
-        // 게임이 처음 시작되거나 재시작 시에만 restart 호출
-        if (state.player.level === 1 && state.time === 0) {
-          gameEngineRef.current.restart();
-        } else {
-          gameEngineRef.current.start();
-        }
+        gameEngineRef.current.resume();
       } else {
         gameEngineRef.current.pause();
       }
     }
-  }, [state.isPlaying, state.isPaused, state.player.level, state.time]);
+  }, [state.isPlaying, state.isPaused]); // 레벨업으로 인한 일시정지는 게임을 재시작하지 않음
 
-  // 플레이어 상태를 GameEngine에 전달
+  // 게임 시작 또는 새 라운드 시작시에만 재시작
+  useEffect(() => {
+    if (gameEngineRef.current && state.isPlaying && !state.isPaused && !state.showLevelUp) {
+      const finalState = applyArtifacts(state, state.ownedArtifacts);
+      gameEngineRef.current.restart(finalState);
+    }
+  }, [state.ownedArtifacts, state.difficulty]); // 유물이나 난이도가 변경될 때만 재시작
+
   useEffect(() => {
     if (gameEngineRef.current) {
-      gameEngineRef.current.updatePlayerStats(state.player.level, state.player.health);
+      gameEngineRef.current.updateFromGameState(state);
     }
-  }, [state.player.level, state.player.health]);
+  }, [state]);
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!gameEngineRef.current || !state.isPlaying || state.isPaused) return;
